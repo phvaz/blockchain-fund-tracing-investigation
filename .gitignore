@@ -1,0 +1,27 @@
+# Credentials — never commit
+.env
+*.key
+api_key*
+secrets*
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Working files not intended for publication
+data/raw/scratch/
+*.tmp
+notes-private.md
