@@ -83,4 +83,4 @@ Two limitations are structural and are stated here in advance, before they are e
 
 | Date | Change | Justification |
 |---|---|---|
-| `[date]` | Initial version — pre-registered before analysis | — |
+| `2026-08-21` | Initial version — pre-registered before analysis | — |
