@@ -19,11 +19,18 @@ USAGE
     python3 trace_helper.py 0xADDRESS --min-value 1.0 --csv hop3.csv
 
 NOTE ON API CONFIGURATION
-    Explorer APIs change their endpoints, parameters, and authentication
-    requirements over time. Verify the current API documentation for the chain
-    you are analyzing and adjust API_BASE and the parameter names below
-    accordingly. Record the API version and rate limits used in tools/README.md
-    for reproducibility.
+    Uses the Etherscan V2 API, which is multichain: the same endpoint and key
+    serve all supported chains, selected via the chainid parameter. The V1
+    endpoint is deprecated.
+
+    Explorer APIs change over time. If requests begin failing, verify the
+    current API documentation and adjust API_BASE and the parameters below.
+    Record the API version and rate limits used in tools/README.md for
+    reproducibility.
+
+CHAIN SELECTION
+    Default chain is Ethereum mainnet (chainid 1). Override with --chainid for
+    other chains — relevant when following funds across a bridge.
 """
 
 import argparse
@@ -40,15 +47,40 @@ except ImportError:
 
 
 # --- Configuration -----------------------------------------------------------
-# Verify against current explorer API documentation before use.
-API_BASE = "https://api.etherscan.io/api"
+# Etherscan V2 multichain endpoint. One key, many chains, selected by chainid.
+API_BASE = "https://api.etherscan.io/v2/api"
+DEFAULT_CHAIN_ID = 1  # Ethereum mainnet
 WEI_PER_ETH = 10**18
 RATE_LIMIT_SLEEP = 0.25  # seconds between calls; adjust to your API tier
 
+# Chains commonly encountered when following funds across bridges.
+# Verify current chainid values against the API documentation before relying
+# on any of these for analysis.
+KNOWN_CHAINS = {
+    1: "Ethereum",
+    10: "Optimism",
+    56: "BNB Smart Chain",
+    137: "Polygon",
+    8453: "Base",
+    42161: "Arbitrum One",
+}
 
-def fetch_transactions(address, api_key, start_block=0, end_block=99999999):
-    """Retrieve the normal transaction list for an address."""
+# Native currency symbol per chain, for display only.
+NATIVE_SYMBOL = {
+    1: "ETH",
+    10: "ETH",
+    56: "BNB",
+    137: "MATIC",
+    8453: "ETH",
+    42161: "ETH",
+}
+
+
+def fetch_transactions(address, api_key, chain_id=DEFAULT_CHAIN_ID,
+                       start_block=0, end_block=99999999):
+    """Retrieve the normal transaction list for an address on a given chain."""
     params = {
+        "chainid": chain_id,
         "module": "account",
         "action": "txlist",
         "address": address,
@@ -71,7 +103,15 @@ def fetch_transactions(address, api_key, start_block=0, end_block=99999999):
         message = payload.get("message", "")
         if "No transactions found" in message:
             return []
-        sys.exit(f"API returned an error: {message} — {payload.get('result')}")
+        detail = payload.get("result", "")
+        if "deprecated" in str(detail).lower():
+            sys.exit(
+                f"API returned an error: {message} — {detail}\n\n"
+                "This script targets the V2 endpoint. If this appears, the API "
+                "has changed again; check the current documentation and update "
+                "API_BASE and the request parameters."
+            )
+        sys.exit(f"API returned an error: {message} — {detail}")
 
     result = payload.get("result")
     if not isinstance(result, list):
@@ -102,19 +142,23 @@ def normalize(tx):
     }
 
 
-def print_table(rows, address):
+def print_table(rows, address, chain_id=DEFAULT_CHAIN_ID):
     """Print a readable summary for manual review."""
+    chain_name = KNOWN_CHAINS.get(chain_id, f"chain {chain_id}")
+    symbol = NATIVE_SYMBOL.get(chain_id, "native")
+
     if not rows:
-        print(f"\nNo outbound transactions found for {address}\n")
+        print(f"\nNo outbound transactions found for {address} on {chain_name}\n")
         return
 
     total = sum(r["value_eth"] for r in rows)
 
     print(f"\nOutbound transactions from {address}")
+    print(f"Chain: {chain_name} (chainid {chain_id})")
     print(f"Retrieved {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC")
-    print(f"{len(rows)} transaction(s), {total:.6f} ETH total\n")
+    print(f"{len(rows)} transaction(s), {total:.6f} {symbol} total\n")
 
-    print(f"{'TIMESTAMP (UTC)':<21} {'VALUE (ETH)':>16}  {'DESTINATION':<44} TX HASH")
+    print(f"{'TIMESTAMP (UTC)':<21} {'VALUE (' + symbol + ')':>16}  {'DESTINATION':<44} TX HASH")
     print("-" * 130)
 
     for r in sorted(rows, key=lambda x: x["value_eth"], reverse=True):
@@ -131,20 +175,29 @@ def print_table(rows, address):
     if rows:
         top = max(rows, key=lambda x: x["value_eth"])
         print(f"\nHighest-value destination: {top['to']}")
-        print(f"  {top['value_eth']:.6f} ETH — tx {top['hash']}")
+        print(f"  {top['value_eth']:.6f} {symbol} — tx {top['hash']}")
         print("\nBranch selection remains an analyst decision. Record branches")
         print("not followed in the phase 03 trace log.\n")
 
 
-def write_csv(rows, path):
+def write_csv(rows, path, chain_id=DEFAULT_CHAIN_ID):
     """Write results for inclusion in the evidence record."""
     if not rows:
         return
-    fields = ["hash", "timestamp_utc", "to", "value_eth", "block", "is_error"]
+    # chain and retrieval time are recorded per row: a CSV that outlives its
+    # context is not evidence.
+    retrieved = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    chain_name = KNOWN_CHAINS.get(chain_id, str(chain_id))
+
+    fields = ["hash", "timestamp_utc", "to", "value_eth", "block", "is_error",
+              "chain_id", "chain_name", "retrieved_utc"]
     with open(path, "w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=fields)
         writer.writeheader()
-        writer.writerows(rows)
+        for r in rows:
+            writer.writerow({**r, "chain_id": chain_id,
+                             "chain_name": chain_name,
+                             "retrieved_utc": retrieved})
     print(f"Written to {path}")
 
 
@@ -158,6 +211,13 @@ def main():
         type=float,
         default=0.0,
         help="Suppress transactions below this value (dust filter)",
+    )
+    parser.add_argument(
+        "--chainid",
+        type=int,
+        default=DEFAULT_CHAIN_ID,
+        help=f"Chain ID (default {DEFAULT_CHAIN_ID}, Ethereum mainnet). "
+             f"Known: {', '.join(f'{k}={v}' for k, v in KNOWN_CHAINS.items())}",
     )
     parser.add_argument("--csv", metavar="PATH", help="Write results to CSV")
     args = parser.parse_args()
@@ -175,7 +235,7 @@ def main():
 
     time.sleep(RATE_LIMIT_SLEEP)
 
-    raw = fetch_transactions(args.address, api_key)
+    raw = fetch_transactions(args.address, api_key, chain_id=args.chainid)
     rows = [normalize(tx) for tx in outbound_only(raw, args.address)]
 
     if args.min_value > 0:
@@ -187,10 +247,10 @@ def main():
             print("Suppressed transactions are still part of the record — note the")
             print("filter threshold in the trace log.")
 
-    print_table(rows, args.address)
+    print_table(rows, args.address, chain_id=args.chainid)
 
     if args.csv:
-        write_csv(rows, args.csv)
+        write_csv(rows, args.csv, chain_id=args.chainid)
 
 
 if __name__ == "__main__":

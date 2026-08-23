@@ -1,0 +1,31 @@
+# Credentials — never commit
+.env
+*.key
+api_key*
+secrets*
+
+# Test and scratch data — not part of the evidence record
+data/raw/teste*.csv
+data/raw/test*.csv
+data/raw/scratch/
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Working files not intended for publication
+*.tmp
+notes-private.md
