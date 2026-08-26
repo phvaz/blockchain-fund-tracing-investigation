@@ -1,7 +1,7 @@
 # Scope, Boundaries and Stopping Rule
 
-> **Status:** Pre-registered. This document was written and fixed **before** any transaction data was examined.
-> Any subsequent modification is recorded in the revision log at the bottom of this file, with its justification.
+> **Status:** Pre-registered. Section 4 as originally written was fixed **before** any transaction data was examined.
+> Section 4.1 was added before tracing began, in response to a condition observed at the anchor. Both the addition and its reason are recorded in the revision log at the end of this file.
 
 ---
 
@@ -55,6 +55,34 @@ The following rule was fixed before analysis began. Its purpose is to make the e
 
 ---
 
+## 4.1 Tie-breaking and scope extension
+
+**Added before tracing began.** Phase 02 validation of the anchor revealed a condition the original rule does not resolve: forty outbound transfers of an identical amount, to forty distinct destinations, within a six-minute window. Where every branch carries the same value, "highest value" selects nothing.
+
+This section is recorded as an addition rather than a silent edit. It was written before any hop was traced, and no branch had been examined beyond the anchor's immediate outputs at the time of writing.
+
+### Tie-breaker
+
+> Where two or more branches carry identical amounts, the branch whose transfer bears the **earliest timestamp** is followed. Where timestamps are also identical, the branch whose destination address is lowest in lexicographic order is followed.
+
+**This is a neutral tie-breaker, not a claim of significance.** Nothing about a transfer being first implies it is more important, and no such claim is made. Its purpose is solely to make branch selection deterministic, reproducible by a third party, and independent of anything the analyst learns downstream.
+
+### Scope extension
+
+The default is that **one branch is followed.** The scope may be extended to additional branches under one condition only:
+
+> Extension is permitted where the followed branch **terminates before reaching a mixer, a bridge, or the five-hop limit** — that is, where the trail ends prematurely for a reason unrelated to the stopping rule, such as funds coming to rest at an address with no further outbound movement.
+
+Three constraints govern any extension:
+
+1. **The trigger is objective.** Extension is available when the trail ends early. It is not available because a result was uninteresting, inconclusive, or less compelling than hoped.
+2. **All branches followed are reported.** If the scope is extended, every branch traced appears in the findings — including those that produced less informative results. Selecting the most interesting outcome from several traced branches and reporting only that one would misrepresent the analysis.
+3. **Extension is recorded** in the revision log below, with its date and the condition that triggered it, before the additional branch is traced.
+
+**Why this is fixed in advance.** A rule of the form *"follow one branch, and follow more if the result is unsatisfactory"* makes the stopping point depend on the result. An investigation conducted that way tends to continue until it finds something worth reporting and to stop when it does — with the discarded attempts invisible to the reader. Constraining extension to an objective trigger, and requiring that everything traced be reported, removes that degree of freedom.
+
+---
+
 ## 5. Attribution policy
 
 This investigation asserts **no attribution**.
@@ -83,4 +111,5 @@ Two limitations are structural and are stated here in advance, before they are e
 
 | Date | Change | Justification |
 |---|---|---|
-| `2026-08-21` | Initial version — pre-registered before analysis | — |
+| `[date of initial commit]` | Initial version — pre-registered before analysis | — |
+| `[today's date]` | Added Section 4.1: tie-breaking criterion and scope-extension clause | Phase 02 anchor validation revealed forty branches of identical value, a condition the original branch-selection rule does not resolve. Added before any hop was traced. |
