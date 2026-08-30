@@ -149,11 +149,23 @@ Two of five token groups are legitimate: stETH (`0xae7ab965…fe84`) and mETH (`
 
 Each destination receiving a staked derivative was checked on Etherscan. All three are contracts, and all three are decentralised-exchange infrastructure.
 
-| Contract | Etherscan label (observed 2026-08-26) | Capture |
-|---|---|---|
-| `0x6bb000067005450704003100632eb93ea00c0000` | Contract; creator tagged "Velora: Deployer 1" | [`hop2-velora-aggregator.png`](../data/screenshots/hop2-velora-aggregator.png) |
-| `0x04708077eca6bb527a5bbbd6358ffb043a9c1c14` | "Uniswap V3: mETH 5" — tagged *Liquidity Pool* | [`hop2-uniswap-meth5-pool.png`](../data/screenshots/hop2-uniswap-meth5-pool.png) |
-| `0xfe837a3530dd566401d35befcd55582af7c4dffc` | "DODO: Fee Route Proxy"; transaction methods shown as *External Swap* and *Mix Swap* | [`hop2-dodo-fee-route-proxy.png`](../data/screenshots/hop2-dodo-fee-route-proxy.png) |
+| Contract | Etherscan label (observed 2026-08-26) |
+|---|---|
+| `0x6bb000067005450704003100632eb93ea00c0000` | Contract; creator tagged "Velora: Deployer 1" |
+| `0x04708077eca6bb527a5bbbd6358ffb043a9c1c14` | "Uniswap V3: mETH 5" — tagged *Liquidity Pool* |
+| `0xfe837a3530dd566401d35befcd55582af7c4dffc` | "DODO: Fee Route Proxy"; transaction methods shown as *External Swap* and *Mix Swap* |
+
+**`0x6bb00006…0000`** — contract page, creator tagged "Velora: Deployer 1":
+
+![Etherscan: contract 0x6bb00006, creator tagged Velora Deployer 1](../data/screenshots/hop2-velora-aggregator.png)
+
+**`0x04708077…1c14`** — labelled "Uniswap V3: mETH 5", tagged *Liquidity Pool*:
+
+![Etherscan: Uniswap V3 mETH 5 liquidity pool](../data/screenshots/hop2-uniswap-meth5-pool.png)
+
+**`0xfe837a35…dffc`** — labelled "DODO: Fee Route Proxy"; transaction methods listed as *External Swap* and *Mix Swap*:
+
+![Etherscan: DODO Fee Route Proxy showing External Swap methods](../data/screenshots/hop2-dodo-fee-route-proxy.png)
 
 These labels are **third-party attributions by Etherscan**, not protocol facts, and are perishable — the "Velora" tag reflects a protocol that was previously named otherwise. Captures were taken for that reason.
 
@@ -293,7 +305,7 @@ The rule was written before any hop was traced and before this condition was enc
 | Funded by | "Bybit Exploiter 5" |
 | Current ETH balance | 0.00047 |
 
-Capture: [`hop3-bybit-exploiter-45.png`](../data/screenshots/hop3-bybit-exploiter-45.png)
+![Etherscan: address labelled Bybit Exploiter 45, carrying Exploit and Bybit Exploit tags, with a warning banner citing ZachXBT, and Funded by Bybit Exploiter 5](../data/screenshots/hop3-bybit-exploiter-45.png)
 
 **On the significance of this label.** This trail was followed from the anchor by mechanical application of the pre-registered rules — highest value, highest value, earliest timestamp — with no third-party analysis of fund movement consulted at any point. The address arrived at by that route carries an independent label associating it with the same incident, and Etherscan records it as funded by another address in the same labelled cluster.
 
@@ -391,12 +403,28 @@ The last row is the clearest case: `0x21032176…044c` received one of the nine 
 
 Each was checked on Etherscan.
 
-| Address | Label | Funded by | Onward behaviour | Capture |
-|---|---|---|---|---|
-| `0x8ed8553d…6036` | *(none)* | "Bybit Exploiter 9" | Transfers to Sky: Dai Stablecoin | [`hop4-8ed8553d.png`](../data/screenshots/hop4-8ed8553d.png) |
-| `0x8b62111b…1ca1` | *(none)* | `0xF9Fe2410…59127` | **`Deposit With Expiry` → THORChain** | [`hop4-8b62111b-thorchain.png`](../data/screenshots/hop4-8b62111b-thorchain.png) |
-| `0x21032176…044c` | **"Bybit Exploiter 46"**, tags `Exploit`, `# Bybit Exploit` | "Bybit Exploiter 5" | Transfers to "Bybit Exploiter 47" | [`hop4-21032176-exploiter46.png`](../data/screenshots/hop4-21032176-exploiter46.png) |
-| `0x54acab84…fba2` | *(none)* | "Bybit Exploiter 42" | **`Deposit With Expiry` → THORChain**, repeatedly | [`hop4-54acab84-thorchain.png`](../data/screenshots/hop4-54acab84-thorchain.png) |
+| Address | Label | Funded by | Onward behaviour |
+|---|---|---|---|
+| `0x8ed8553d…6036` | *(none)* | "Bybit Exploiter 9" | Transfers to Sky: Dai Stablecoin |
+| `0x8b62111b…1ca1` | *(none)* | `0xF9Fe2410…59127` | **`Deposit With Expiry` → THORChain** |
+| `0x21032176…044c` | **"Bybit Exploiter 46"**, tags `Exploit`, `# Bybit Exploit` | "Bybit Exploiter 5" | Transfers to "Bybit Exploiter 47" |
+| `0x54acab84…fba2` | *(none)* | "Bybit Exploiter 42" | **`Deposit With Expiry` → THORChain**, repeatedly |
+
+**`0x8ed8553d…6036`** — no label; funded by "Bybit Exploiter 9"; onward transfers to Sky: Dai Stablecoin:
+
+![Etherscan: 0x8Ed8553D funded by Bybit Exploiter 9, transferring to Sky Dai Stablecoin](../data/screenshots/hop4-8ed8553d.png)
+
+**`0x8b62111b…1ca1`** — `Deposit With Expiry` calls to THORChain:
+
+![Etherscan: 0x8B62111B making Deposit With Expiry calls to THORChain](../data/screenshots/hop4-8b62111b-thorchain.png)
+
+**`0x21032176…044c`** — labelled "Bybit Exploiter 46", tagged `Exploit`; funded by "Bybit Exploiter 5"; transfers onward to "Bybit Exploiter 47":
+
+![Etherscan: address labelled Bybit Exploiter 46 with Exploit tags and ZachXBT warning banner](../data/screenshots/hop4-21032176-exploiter46.png)
+
+**`0x54acab84…fba2`** — repeated `Deposit With Expiry` calls to THORChain, receiving from addresses labelled "Bybit Exploiter 5", "52" and "53":
+
+![Etherscan: 0x54AcAB84 making repeated Deposit With Expiry calls to THORChain](../data/screenshots/hop4-54acab84-thorchain.png)
 
 **Two of the four deposit into THORChain**, a cross-chain swap protocol. `0x54acab84…fba2` does so systematically — receiving from addresses labelled "Bybit Exploiter 5", "52" and "53" and forwarding to THORChain in amounts of 208.6 to 223.38 ETH.
 
@@ -419,7 +447,9 @@ The branch selected at this hop does not itself deposit into THORChain. But adja
 
 Selecting the reading that produces the better result, after seeing where each leads, is precisely what pre-registration exists to prevent. The interpretation applied is the one that follows from the rule's purpose, not from its consequences here.
 
-**Verification:** `0x327ffe25…ba23` is an externally-owned account, unlabelled, recorded as funded by "Bybit Exploiter 19", receiving from "Bybit Exploiter 45" and "46". Capture: [`hop4-327ffe25.png`](../data/screenshots/hop4-327ffe25.png)
+**Verification.** `0x327ffe25…ba23` is an externally-owned account, unlabelled, recorded as funded by "Bybit Exploiter 19" and receiving from "Bybit Exploiter 45" and "46":
+
+![Etherscan: 0x327Ffe25, an unlabelled account funded by Bybit Exploiter 19 and receiving from Exploiter 45 and 46](../data/screenshots/hop4-327ffe25.png)
 
 ### Branches not followed
 
