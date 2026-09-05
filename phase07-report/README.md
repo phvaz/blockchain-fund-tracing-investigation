@@ -46,6 +46,5 @@ Fixed in Phase 00 and applied throughout:
 
 The trail documented carries approximately **0.11%** of the value that left the anchor address. The remaining 99.89% was not examined. No statement in the report about "the funds" applies beyond the single path recorded in Section 7 — a boundary stated in the executive summary, restated at the end of the trace, and carried into the conclusions, because it governs the weight of everything else in the document.
 
----
 
-← [Phase 06 — Cross-Validation](../phase06-validation/README.md)
+

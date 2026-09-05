@@ -1,7 +1,5 @@
 # Phase 01 — Environment Preparation
 
-**Status:** `[x] Complete`
-
 ## Objective
 
 Establish an isolated analysis environment consistent with the OpSec posture defined in Phase 00, and verify tool availability before analysis begins.

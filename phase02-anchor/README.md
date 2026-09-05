@@ -1,7 +1,5 @@
 # Phase 02 — Anchor Point Identification
 
-**Status:** `[x] Complete`
-
 ## Objective
 
 Obtain the starting address for the trace, with documented provenance, **without contaminating the independent analysis**.
