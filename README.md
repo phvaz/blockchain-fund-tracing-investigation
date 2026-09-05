@@ -1,163 +1,126 @@
 # Blockchain Investigation Case Study — Public Trail Analysis of the Bybit 2025 Incident
 
-> **Case reference:** BIC-2026-001
-> **Status:** In progress
-> **Classification:** Academic portfolio — open-source investigation
+> **📄 [Read the full report (PDF, 34 pages)](phase07-report/BIC-2026-001-blockchain-investigation-report.pdf)**
+>
+> **Case reference:** BIC-2026-001 · **Status:** Complete · **Classification:** Academic portfolio
 
-A methodological case study in blockchain fund-flow analysis. This investigation reconstructs a **single, delimited trail** of funds associated with the publicly reported Bybit incident of February 2025, using exclusively open-source tooling, and measures how far an independent analyst can get before hitting the limits of publicly available attribution data.
+An independent, open-source reconstruction of one delimited fund trail associated with the publicly reported Bybit incident of February 2025 — and a measurement of the point at which open-source analysis stops working.
 
-The purpose is **not** to identify perpetrators, expose undocumented infrastructure, or replicate the work of commercial intelligence firms. It is to demonstrate investigative methodology under realistic constraints — and to document precisely where those constraints begin.
+The investigation used a public block explorer and a purpose-built retrieval script. No commercial blockchain intelligence platform was used, and no published analysis of the incident was read until every finding had been finalized and committed.
 
 ---
 
-## Overview
+## The question this project answers
 
-| Field | Value |
+The destination of the stolen funds is already documented by firms with proprietary datasets and by agencies with subpoena power. That was never the question here.
+
+**How far can an independent analyst trace such a trail using only public data, and what exactly stops them?**
+
+The answer, established in Section 11 of the report: open-source tracing and a specialist firm's proprietary platform agree **completely** on the Ethereum-native path — same addresses, same amounts, one figure matching to four decimal places. They diverge at exactly one point: the cross-chain bridge. Crossing it requires proprietary heuristics or legal process. The limit is not one of skill or effort; it is the point at which the required information ceases to exist on the public Ethereum ledger.
+
+---
+
+## Principal findings
+
+| Finding | Detail |
 |---|---|
-| Case reference | BIC-2026-001 |
-| Analyst | Paulo Vaz |
-| Subject | One delimited fund trail from a publicly reported incident |
-| Method | Open-source blockchain analysis (block explorers, public APIs) |
-| Anchor point | `[TO FILL — sourced from public disclosure, see collection-log.md]` |
-| Stopping rule | `[TO FILL — pre-registered before analysis began]` |
-| Analytic standards | Fact / Inference / Attribution taxonomy · ICD 203 confidence levels · FATF Virtual Asset red-flag typologies |
-| Tooling | `[TO FILL]` |
-| Report | `[link to final report]` |
+| **Five hops reconstructed independently** | From the anchor through derivative consolidation, DEX conversion to native ETH, two levels of fragmentation, and a final consolidation point — 98,376 ETH-equivalent at the first hop, narrowing to 454 ETH at the fifth |
+| **Corroborated transfer-for-transfer** | Matches a specialist firm's published analysis through the first three hops, with that analysis read only *after* the findings were frozen and committed |
+| **Deliberate contamination identified** | Nine impersonating token contracts using non-Latin homoglyphs, clean-ASCII forgeries that no automated check catches, and 31 lookalike addresses matching genuine counterparties in their first six and last four characters |
+| **Two FATF indicators verified at source** | Fragmentation (§11, p. 6) and multi-asset conversion (§12, p. 9). Four further patterns had **no** correspondence and were recorded as observations rather than forced into a classification |
+| **No attribution asserted** | Published sources attribute the incident to a named actor on evidence this analysis did not have. Cross-validation later confirmed that stopping short was correct |
+
+### The trap the contamination forms
+
+The impersonating `stETH` contract shows **554,882 units outbound — the largest single figure in the entire dataset**, larger than any legitimate movement. Its destination is a lookalike of the genuine branch, matching in the first six and last four characters.
+
+An analyst ranking branches by displayed amount, without verifying contract addresses, would have selected a fabricated flow, followed it to the wrong address, and continued from there. Every subsequent hop would be wrong, and **nothing in the output would indicate an error**.
 
 ---
 
-## Why this project exists
+## Method
 
-My previous four portfolio projects cover host and network forensics — disk imaging, memory analysis, filesystem artifacts, packet capture. All of them investigate a *machine*.
+### Pre-registration
 
-This one investigates *money*. The evidence is a public, immutable ledger rather than a seized device; the adversary is not trying to delete artifacts but to make a trail computationally expensive to follow; and the analytical limit is not tool capability but access to proprietary attribution data.
+The rule governing branch selection and termination was written and committed to version control **before any transaction data was examined**:
 
-The methodological discipline carries over. The domain does not.
+> **Branch selection.** Highest value at each fragmentation; where amounts are identical, the earliest timestamp; where timestamps are also identical, the lowest destination address lexicographically.
+>
+> **Termination.** Mixer or bridge entry, or five hops from the anchor — whichever comes first.
 
----
+The rule proved consequential. At Hop 3 the trace met nine branches of exactly 10,000 ETH each, a condition under which "highest value" selects nothing. The tie-breaker — written before that condition was encountered — resolved the choice without discretion being exercised at the point of decision.
 
-## Methodological commitments
+### Claim taxonomy
 
-Three rules were fixed **before** any data was examined. They are recorded here because a rule declared afterwards is a rationalization, not a method.
+Every claim is typed, because on a public ledger the raw data is exceptionally reliable while conclusions drawn from it are often weaker than they appear:
 
-### 1. Independent analysis precedes comparison
-
-Published analyses of this incident exist. They were **not** consulted during the investigative phases. Only the anchor address — a matter of public record — was sourced externally, and the collection log documents exactly what was read and when.
-
-Cross-validation against published analyses occurs in Phase 06, after all findings were finalized. This preserves the ability to measure what an independent analyst reaches unaided, rather than confirming a conclusion already known.
-
-### 2. The stopping rule was pre-registered
-
-`[TO FILL — e.g. "Follow the highest-value branch at each fragmentation, to a maximum of N hops from the anchor, or until funds enter a mixing service or cross-chain bridge, whichever occurs first."]`
-
-Where the rule was modified mid-analysis, the modification and its justification are documented rather than applied silently.
-
-### 3. Every claim is typed
-
-| Type | Definition | Evidentiary basis |
-|---|---|---|
-| **Fact** | Recorded on-chain and independently verifiable by any party | The ledger itself — immutable |
-| **Inference** | An analytical conclusion drawn from observed facts using a stated heuristic | Reasoning, which may be wrong |
-| **Attribution** | Linking an address to a named real-world actor | Requires evidence beyond the scope of open-source analysis |
-
-**No attribution is asserted in this report.** Where published sources attribute activity to a specific actor, that attribution is reported as a third-party claim, not as a finding of this analysis.
-
----
-
-## Operational security
-
-Investigating a trail associated with a state-linked threat actor carries a consideration absent from ordinary lab work: the researcher may become a target of interest. The actor group associated with this incident has a documented history of campaigns aimed at security researchers — false recruiter profiles, malicious "collaboration" repositories, and weaponized datasets offered for analysis.
-
-The measures adopted, and the reasoning behind each, are documented in [`methodology/opsec.md`](methodology/opsec.md). They are deliberately proportionate: this analysis reads a public ledger and executes nothing.
-
-The most important control is behavioral rather than technical, and applies indefinitely after publication: **unsolicited offers of collaboration, datasets, tooling, or opportunity are treated as hostile until proven otherwise.**
-
----
-
-## Investigation phases
-
-| Phase | Focus | Status |
-|---|---|---|
-| [00 — Scope, OpSec & Methodology](phase00-scope-and-opsec/) | Scope boundaries, stopping rule, security posture, analytic standards | `[ ]` |
-| [01 — Environment Preparation](phase01-environment/) | Isolated analysis environment and tooling verification | `[ ]` |
-| [02 — Anchor Point Identification](phase02-anchor/) | Sourcing the starting address with documented provenance | `[ ]` |
-| [03 — Independent Trace](phase03-trace/) | Hop-by-hop reconstruction within the stopping rule | `[ ]` |
-| [04 — Typology Identification](phase04-typologies/) | Observed laundering patterns mapped to catalogued typologies | `[ ]` |
-| [05 — Reliability Assessment](phase05-reliability/) | Fact/inference/attribution classification and confidence levels | `[ ]` |
-| [06 — Cross-Validation](phase06-validation/) | Comparison against published analyses | `[ ]` |
-| [07 — Consolidated Report](phase07-report/) | Formal investigation report | `[ ]` |
-
----
-
-## Key findings
-
-`[TO FILL — after Phase 05]`
-
-Each finding will state: the observation (fact), the interpretation (inference, with its heuristic and confidence level), and the boundary beyond which the evidence does not support further conclusion.
-
----
-
-## Limitations
-
-`[TO FILL — after Phase 06, each with its concrete impact on specific conclusions]`
-
-Two are known in advance and are structural rather than incidental:
-
-- **The private attribution wall.** Commercial intelligence platforms maintain proprietary databases of labelled addresses. An address that is anonymous to open-source analysis may already be identified in those datasets. Where this analysis reaches that boundary, it is documented as a finding in its own right — the point at which open tooling ceases to be sufficient.
-- **Scale without automation.** Fragmentation across many addresses is deliberately designed to make manual tracing impractical. The stopping rule and any automation used are documented so a reader can distinguish an analytical boundary from an endurance one.
-
----
-
-## Standards & frameworks
-
-| Framework | Application |
+| Type | Basis |
 |---|---|
-| FATF — Virtual Assets Red Flag Indicators | Typology classification of observed movement patterns |
-| ICD 203 — Analytic Standards | Separation of observed data from analytic judgment; expressed confidence levels |
-| ISO/IEC 27043 | Investigation process — scope definition and structured methodology |
-| Admiralty Code (NATO STANAG 2511) | Source grading where third-party sources are consulted (Phase 06) |
+| **Fact** | Recorded on-chain; verifiable by any party against any node |
+| **Inference** | Reasoned from facts using a stated heuristic; carries a confidence level |
+| **Attribution** | Links an address to a named actor. Requires evidence beyond the ledger — **not asserted by this analysis** |
+
+Final register: **10 facts · 8 inferences · 3 third-party attributions recorded but not adopted.**
+
+### Sequence integrity
+
+Published analyses were not consulted during the investigative phases. Only the anchor address was sourced externally, and the collection log records what was read, when, and from where. Cross-validation occurred only after findings were committed — **and the findings were not revised afterwards.** An analyst who reads the answer first cannot afterwards distinguish what they found from what they were looking for.
+
+---
+
+## Repository
+
+| Phase | Contents |
+|---|---|
+| [00 — Scope, OpSec & Methodology](phase00-scope-and-opsec/) | Pre-registered stopping rule, threat model, analytic standards |
+| [01 — Environment](phase01-environment/) | Isolated environment, egress verification, tooling validation |
+| [02 — Anchor Point](phase02-anchor/) | Three-level provenance chain; first identification of token impersonation |
+| [03 — Independent Trace](phase03-trace/) | Five hops, hop by hop, with every unfollowed branch recorded |
+| [04 — Typologies](phase04-typologies/) | FATF correspondence, verified at source — including where none exists |
+| [05 — Reliability](phase05-reliability/) | Claim register; the private attribution boundary |
+| [06 — Cross-Validation](phase06-validation/) | Comparison against published analyses |
+| [07 — Report](phase07-report/) | **[The consolidated report](phase07-report/BIC-2026-001-blockchain-investigation-report.pdf)** |
+
+**Supporting material:** [`methodology/`](methodology/) — scope, OpSec posture, analytic standards · [`collection-log.md`](collection-log.md) — provenance record for every external source · [`tools/`](tools/) — retrieval script and its development log · [`data/`](data/) — raw retrieval output and captures
+
+---
+
+## Tooling
+
+[`tools/trace_helper.py`](tools/trace_helper.py) retrieves and tabulates outbound transfers for an address. Its [development log](tools/README.md) records each change and what prompted it — the tool grew in response to what the investigation revealed, and its limitations at each stage bear on what the analysis could see at the time.
+
+Three decisions embedded in it are worth noting, because each encodes a piece of investigative reasoning:
+
+- **It never sums across assets.** One unit of one token and one unit of another are not comparable quantities.
+- **It reads token decimals rather than assuming them.** Assuming 18 for a 6-decimal token understates the amount by a factor of a trillion — silently.
+- **It groups by `(symbol, contract)`, never by symbol.** A token's symbol is chosen by whoever deploys it. Only the contract address identifies an asset.
+
+**What it does not do:** make analytical decisions. It surfaces the highest-value destination and then states explicitly that branch selection remains the analyst's. It flags non-Latin characters in symbols, but a clean-ASCII forgery passes unflagged — as one did at Hop 3, and was caught by judgment rather than by the tool.
+
+---
+
+## Scope and limitations
+
+The trail documented carries approximately **0.11%** of the value that left the anchor. The remaining 99.89% was not examined.
+
+**No statement in this project about "the funds" applies beyond the single documented path.** This is the stopping rule operating as designed, and it is the boundary governing the weight of every conclusion. The full set of limitations, each with its concrete impact, is in Section 12 of the report.
 
 ---
 
 ## Legal and ethical position
 
-All data examined is public by design. Blockchain ledgers are open records; reading them constitutes no unauthorized access to any system. No wallet was connected, no contract was interacted with, and no query was directed at private infrastructure.
+All data examined is public by design. Blockchain ledgers are open records published by the protocol to every participant; reading one is not analogous to accessing a private system. **No query was directed at any private system, no wallet was connected, no contract was called, and no transaction was broadcast.**
 
-This is an educational case study. It does not constitute a legal instrument, an accusation, or an intelligence product. No natural person is named or implicated.
+The passive-only method was chosen deliberately: it keeps the investigation on the correct side of the boundary between consulting published records and unauthorized access (Lei 12.737/2012, Art. 154-A, and comparable statutes).
 
-Where analysis surfaced anything not already present in public reporting, it is **not published here** — such material was withheld and reviewed privately before any decision on disclosure.
+No natural person is named or identified, and identification of natural persons was explicitly out of scope. Anything surfaced that was not already present in public reporting would have been withheld and reviewed privately before any disclosure decision; no such material arose.
 
----
-
-## Repository structure
-
-```
-├── README.md
-├── CHANGELOG.md
-├── collection-log.md          # provenance: every source, query, and timestamp
-├── methodology/
-│   ├── scope-and-limitations.md
-│   ├── opsec.md
-│   └── analytic-standards.md
-├── phase00-scope-and-opsec/
-├── phase01-environment/
-├── phase02-anchor/
-├── phase03-trace/
-├── phase04-typologies/
-├── phase05-reliability/
-├── phase06-validation/
-├── phase07-report/
-├── tools/                     # analysis scripts
-└── data/
-    ├── raw/
-    └── graphs/
-```
+This is an academic case study. It is **not** a legal instrument, an accusation, or an intelligence product in any jurisdiction.
 
 ---
 
 ## Analyst
 
-**Paulo Vaz** — Digital forensics and financial crime investigation
-`[GitHub]` · `[LinkedIn]`
+**Paulo Vaz** — digital forensics and financial crime investigation
 
-Conducted under the mentorship of Arlete Figueiredo Muoio (Aissa Tecnologia da Informação), whose guidance shaped the scope boundaries, operational security posture, and analytical discipline applied throughout.
+Conducted under the mentorship of **Arlete Figueiredo Muoio** (Aissa Tecnologia da Informação), whose guidance shaped the scope boundaries, the operational security posture, and the analytical discipline applied throughout — in particular the requirement that conclusions carry no more weight than the evidence permits.
