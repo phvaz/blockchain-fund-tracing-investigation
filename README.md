@@ -123,4 +123,3 @@ This is an academic case study. It is **not** a legal instrument, an accusation,
 
 **Paulo Vaz** — digital forensics and financial crime investigation
 
-Conducted under the mentorship of **Arlete Figueiredo Muoio** (Aissa Tecnologia da Informação), whose guidance shaped the scope boundaries, the operational security posture, and the analytical discipline applied throughout — in particular the requirement that conclusions carry no more weight than the evidence permits.
