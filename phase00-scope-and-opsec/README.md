@@ -1,7 +1,5 @@
 # Phase 00 — Scope, OpSec and Methodology
 
-**Status:** `[ ] Not started  [ ] In progress  [ ] Complete`
-
 Everything in this phase was decided and written **before** any transaction data was examined. A rule declared after the fact is a rationalization, not a method.
 
 ## Deliverables

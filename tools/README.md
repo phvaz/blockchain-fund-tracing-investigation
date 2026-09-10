@@ -110,7 +110,7 @@ The same retrieval also returned a token whose symbol was literally `BybitExploi
 | Key tier | Free |
 | Chain selection | `chainid` parameter |
 | Actions used | `txlist` (native), `tokentx` (ERC-20) |
-| Rate limit | `[record observed limit for the tier in use]` |
+| Rate limit | Not encountered. Total request volume across the investigation was under 30 calls; the free tier's limit was never approached |
 | Verified working | 2026-08-24 |
 
 ---
