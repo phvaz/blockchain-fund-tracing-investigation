@@ -111,5 +111,5 @@ Two limitations are structural and are stated here in advance, before they are e
 
 | Date | Change | Justification |
 |---|---|---|
-| `[date of initial commit]` | Initial version — pre-registered before analysis | — |
-| `[today's date]` | Added Section 4.1: tie-breaking criterion and scope-extension clause | Phase 02 anchor validation revealed forty branches of identical value, a condition the original branch-selection rule does not resolve. Added before any hop was traced. |
+| `2026-08-24` | Initial version — pre-registered before analysis | — |
+| `2026-08-24` | Added Section 4.1: tie-breaking criterion and scope-extension clause | Phase 02 anchor validation revealed forty branches of identical value, a condition the original branch-selection rule does not resolve. Added before any hop was traced. |
